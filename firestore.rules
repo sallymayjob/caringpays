@@ -1,0 +1,170 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: sessions
+    // Document ID: sessionId
+    // Fields:
+    //   - sessionId: string (required)
+    //   - userId: string (required)
+    //   - anonymousProfileId: string (required)
+    //   - status: string (enum: ACTIVE, CLOSED, ABANDONED)
+    //   - currentState: string
+    //   - lockSession: bool
+    //   - firstName: string (optional)
+    //   - userState: string (optional)
+    //   ... other session variables
+    //
+    // Collection: sessions/{sessionId}/messages
+    // Document ID: messageId
+    // Fields:
+    //   - messageId: string (required)
+    //   - senderType: string (enum: charlie, user)
+    //   - messageText: string (required, max 5000 chars)
+    //
+    // Collection: leads
+    // Document ID: leadId
+    // Fields:
+    //   - leadId: string (required)
+    //   - firstName: string (required, max 100 chars)
+    //   - lastName: string (required, max 100 chars)
+    //   - email: string (required, email format)
+    //   - phone: string (required, phone format)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "sally@staffhero.co" && request.auth.token.email_verified == true));
+    }
+
+    function isStaff() {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'care_advisor', 'ops_specialist', 'supervisor'];
+    }
+
+    function isSessionOwner(sessionId) {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/sessions/$(sessionId)).data.userId == request.auth.uid ||
+        get(/databases/$(database)/documents/sessions/$(sessionId)).data.anonymousProfileId == request.auth.uid
+      );
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidPhone(phone) {
+      return phone is string && phone.replace("\\D", "").size() >= 10;
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidSession(data) {
+      return data.sessionId is string &&
+             data.status in ['ACTIVE', 'CLOSED', 'ABANDONED'] &&
+             data.currentState is string &&
+             data.createdAt is timestamp &&
+             (data.userId == request.auth.uid || data.anonymousProfileId == request.auth.uid);
+    }
+
+    function isValidMessage(data) {
+      return data.messageId is string &&
+             data.senderType in ['charlie', 'user'] &&
+             data.messageText is string && data.messageText.size() <= 5000 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidLead(data) {
+      return data.leadId is string &&
+             data.firstName is string && data.firstName.size() <= 100 &&
+             data.lastName is string && data.lastName.size() <= 100 &&
+             isValidEmail(data.email) &&
+             isValidPhone(data.phone) &&
+             data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if isSessionOwner(sessionId) || isStaff();
+      allow create: if isAuthenticated() && isValidSession(request.resource.data);
+      allow update: if (isSessionOwner(sessionId) && !resource.data.lockSession && isValidSession(request.resource.data)) || isStaff();
+      
+      match /messages/{messageId} {
+        allow read: if isSessionOwner(sessionId) || isStaff();
+        allow create: if isSessionOwner(sessionId) && isValidMessage(request.resource.data);
+      }
+
+      match /screeningRuns/{runId} {
+        allow read: if isSessionOwner(sessionId) || isStaff();
+        allow write: if isSessionOwner(sessionId) || isStaff();
+      }
+
+      match /screeningAnswers/{answerId} {
+        allow read: if isSessionOwner(sessionId) || isStaff();
+        allow write: if isSessionOwner(sessionId) || isStaff();
+      }
+    }
+
+    match /leads/{leadId} {
+      allow read: if isStaff();
+      allow create: if isAuthenticated() && isValidLead(request.resource.data);
+      allow update: if isStaff();
+    }
+
+    match /escalations/{escalationId} {
+      allow read: if isStaff();
+      allow create: if isAuthenticated();
+      allow update: if isStaff();
+    }
+
+    match /consentRecords/{consentId} {
+      allow read: if isStaff();
+      allow create: if isAuthenticated();
+    }
+
+    match /crmSyncLogs/{logId} {
+      allow read: if isStaff();
+      allow create: if isAuthenticated();
+    }
+
+    match /auditLogs/{auditId} {
+      allow read: if isStaff();
+      allow create: if isAuthenticated();
+    }
+
+    match /feedback/{feedbackId} {
+      allow read: if isStaff();
+      allow create: if isAuthenticated();
+    }
+  }
+}

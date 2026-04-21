@@ -1,0 +1,302 @@
+{
+  "entities": {
+    "Session": {
+      "title": "Session",
+      "description": "Main session document for a Charlie interaction.",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "status": { "type": "string", "enum": ["ACTIVE", "CLOSED", "ABANDONED"] },
+        "currentState": { "type": "string" },
+        "intent": { "type": "string" },
+        "firstName": { "type": "string" },
+        "userState": { "type": "string" },
+        "caregiverType": { "type": "string" },
+        "careRelationship": { "type": "string" },
+        "careRecipientAge": { "type": "string" },
+        "careType": { "type": "string" },
+        "careSituation": { "type": "string" },
+        "medicaidStatus": { "type": "string" },
+        "currentCareStatus": { "type": "string" },
+        "careDuration": { "type": "string" },
+        "livingSituation": { "type": "string" },
+        "referralSource": { "type": "string" },
+        "adlNeeds": { "type": "string" },
+        "otherProgram": { "type": "string" },
+        "nursingStatus": { "type": "string" },
+        "primaryHealthCondition": { "type": "string" },
+        "mobilityLevel": { "type": "string" },
+        "careFrequency": { "type": "string" },
+        "nightCareNeeded": { "type": "string" },
+        "mealPrepNeeded": { "type": "string" },
+        "medManagementNeeded": { "type": "string" },
+        "transportationNeeded": { "type": "string" },
+        "housekeepingNeeded": { "type": "string" },
+        "financialManagementNeeded": { "type": "string" },
+        "socialIsolationRisk": { "type": "string" },
+        "caregiverBurnout": { "type": "string" },
+        "otherFamilySupport": { "type": "string" },
+        "homeSafetyStairs": { "type": "string" },
+        "equipmentNeeds": { "type": "string" },
+        "veteranStatus": { "type": "string" },
+        "incomeLevel": { "type": "string" },
+        "primaryGoal": { "type": "string" },
+        "scoringScore": { "type": "number" },
+        "classification": { "type": "string" },
+        "offTopicCount": { "type": "number" },
+        "kbResponseCount": { "type": "number" },
+        "escalationCode": { "type": "string" },
+        "consentGiven": { "type": "boolean" },
+        "consentVersion": { "type": "string" },
+        "lockSession": { "type": "boolean" },
+        "feedbackProvided": { "type": "boolean" },
+        "lastActivityAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" },
+        "anonymousProfileId": { "type": "string" }
+      },
+      "required": ["sessionId", "status", "currentState", "createdAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A single message in a session.",
+      "type": "object",
+      "properties": {
+        "messageId": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "senderType": { "type": "string", "enum": ["charlie", "user"] },
+        "messageText": { "type": "string" },
+        "category": { "type": "string" },
+        "distressSignal": { "type": "boolean" },
+        "kbGrounded": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "intentAtMessage": { "type": "string" },
+        "stateAtMessage": { "type": "string" }
+      },
+      "required": ["messageId", "sessionId", "senderType", "messageText", "createdAt"]
+    },
+    "ScreeningRun": {
+      "title": "ScreeningRun",
+      "description": "A single screening attempt within a session.",
+      "type": "object",
+      "properties": {
+        "screeningRunId": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "state": { "type": "string" },
+        "score": { "type": "number" },
+        "classification": { "type": "string" },
+        "screeningStatus": { "type": "string" },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "criteriaVersion": { "type": "string" },
+        "scoringVersion": { "type": "string" }
+      },
+      "required": ["screeningRunId", "sessionId", "startedAt"]
+    },
+    "ScreeningAnswer": {
+      "title": "ScreeningAnswer",
+      "description": "An answer to a screening question.",
+      "type": "object",
+      "properties": {
+        "answerId": { "type": "string" },
+        "screeningRunId": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "questionId": { "type": "string" },
+        "answerValue": { "type": "string" },
+        "normalizedAnswer": { "type": "string" },
+        "weightApplied": { "type": "number" },
+        "mandatoryGateResult": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["answerId", "screeningRunId", "questionId", "answerValue", "createdAt"]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "Captured lead data after consent.",
+      "type": "object",
+      "properties": {
+        "leadId": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "state": { "type": "string" },
+        "careType": { "type": "string" },
+        "score": { "type": "number" },
+        "classification": { "type": "string" },
+        "consentVersion": { "type": "string" },
+        "crmStatus": { "type": "string" },
+        "serviceOfInterest": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["leadId", "sessionId", "firstName", "lastName", "email", "phone", "createdAt"]
+    },
+    "Escalation": {
+      "title": "Escalation",
+      "description": "An escalation record for human review.",
+      "type": "object",
+      "properties": {
+        "escalationId": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "escCode": { "type": "string" },
+        "triggerMessage": { "type": "string" },
+        "reviewer": { "type": "string" },
+        "slaDue": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "resolvedAt": { "type": "string", "format": "date-time" },
+        "queueType": { "type": "string" },
+        "autoResumeAllowed": { "type": "boolean" }
+      },
+      "required": ["escalationId", "sessionId", "escCode", "createdAt"]
+    },
+    "ConsentRecord": {
+      "title": "ConsentRecord",
+      "description": "Record of user consent.",
+      "type": "object",
+      "properties": {
+        "consentId": { "type": "string" },
+        "leadId": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "consentText": { "type": "string" },
+        "version": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "ipHash": { "type": "string" },
+        "userAgent": { "type": "string" },
+        "consentMethod": { "type": "string" }
+      },
+      "required": ["consentId", "sessionId", "consentText", "version", "timestamp"]
+    },
+    "CRMSyncLog": {
+      "title": "CRMSyncLog",
+      "description": "Log of CRM synchronization attempts.",
+      "type": "object",
+      "properties": {
+        "crmLogId": { "type": "string" },
+        "leadId": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "payload": { "type": "string" },
+        "responseCode": { "type": "number" },
+        "retryCount": { "type": "number" },
+        "finalStatus": { "type": "string" },
+        "lastAttemptAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["crmLogId", "leadId", "sessionId", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Audit trail for system events.",
+      "type": "object",
+      "properties": {
+        "auditId": { "type": "string" },
+        "linkedRecordType": { "type": "string" },
+        "linkedRecordId": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "eventType": { "type": "string" },
+        "beforeValue": { "type": "string" },
+        "afterValue": { "type": "string" },
+        "performedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["auditId", "eventType", "createdAt"]
+    },
+    "Feedback": {
+      "title": "Feedback",
+      "description": "User feedback on their experience.",
+      "type": "object",
+      "properties": {
+        "feedbackId": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["feedbackId", "sessionId", "rating", "createdAt"]
+    },
+    "SystemSetting": {
+      "title": "SystemSetting",
+      "description": "Application settings and integration keys.",
+      "type": "object",
+      "properties": {
+        "settingId": { "type": "string" },
+        "geminiApiKey": { "type": "string" },
+        "ghlApiKey": { "type": "string" },
+        "ghlLocationId": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["settingId", "updatedAt"]
+    },
+    "EscalationProtocol": {
+      "title": "EscalationProtocol",
+      "description": "Dynamic escalation rule for Charlie.",
+      "type": "object",
+      "properties": {
+        "protocolId": { "type": "string" },
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "triggerCondition": { "type": "string" },
+        "action": { "type": "string" },
+        "keywords": { "type": "array", "items": { "type": "string" } },
+        "isDefault": { "type": "boolean" },
+        "isActive": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["protocolId", "code", "name", "triggerCondition", "action", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/escalationProtocols/{protocolId}": {
+      "schema": "EscalationProtocol",
+      "description": "System escalation protocols."
+    },
+    "/systemSettings/{settingId}": {
+      "schema": "SystemSetting",
+      "description": "Global system settings."
+    },
+    "/sessions/{sessionId}": {
+      "schema": "Session",
+      "description": "User sessions."
+    },
+    "/sessions/{sessionId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Messages within a session."
+    },
+    "/sessions/{sessionId}/screeningRuns/{runId}": {
+      "schema": "ScreeningRun",
+      "description": "Screening attempts within a session."
+    },
+    "/sessions/{sessionId}/screeningAnswers/{answerId}": {
+      "schema": "ScreeningAnswer",
+      "description": "Answers to screening questions."
+    },
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Captured leads."
+    },
+    "/escalations/{escalationId}": {
+      "schema": "Escalation",
+      "description": "Escalation records."
+    },
+    "/consentRecords/{consentId}": {
+      "schema": "ConsentRecord",
+      "description": "Consent records."
+    },
+    "/crmSyncLogs/{logId}": {
+      "schema": "CRMSyncLog",
+      "description": "CRM sync logs."
+    },
+    "/auditLogs/{auditId}": {
+      "schema": "AuditLog",
+      "description": "System audit logs."
+    },
+    "/feedback/{feedbackId}": {
+      "schema": "Feedback",
+      "description": "User feedback records."
+    }
+  }
+}
